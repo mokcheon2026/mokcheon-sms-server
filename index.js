@@ -133,5 +133,12 @@ app.post("/onPointAdded", async (req, res) => {
 // 헬스체크
 app.get("/", (req, res) => res.send("목천고 SMS 서버 정상 작동 중 ✅"));
 
+// 서버 외부 IP 확인
+app.get("/myip", async (req, res) => {
+  const r = await fetch("https://ifconfig.me");
+  const ip = await r.text();
+  res.send(`서버 외부 IP: ${ip}`);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`SMS 서버 실행 중: 포트 ${PORT}`));
