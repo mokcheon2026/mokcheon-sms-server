@@ -141,4 +141,13 @@ app.get("/myip", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`SMS 서버 실행 중: 포트 ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`SMS 서버 실행 중: 포트 ${PORT}`);
+
+  // 슬립 방지 - 5분마다 자기 자신에게 핑
+  setInterval(() => {
+    fetch("https://mokcheon-sms-server.onrender.com")
+      .then(() => console.log("슬립 방지 핑 완료"))
+      .catch(() => {});
+  }, 5 * 60 * 1000);
+});
