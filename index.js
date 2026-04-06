@@ -105,7 +105,23 @@ app.get("/approve", async (req, res) => {
   }
 });
 
-// ─── 상벌점 알림 처리 ──────────────────────────────────────────────────────
+// ─── 교사 대리 신청 알림 ───────────────────────────────────────────────────
+app.post("/onProxyLeave", async (req, res) => {
+  try {
+    const { studentName, room, type, date, timeOut, timeIn, returnDate, reason, parentPhone } = req.body;
+
+    if (!parentPhone) return res.json({ success: false, message: "학부모 번호 없음" });
+
+    const timeInfo = type === "외출" && timeOut && timeIn ? ` (${timeOut}~${timeIn})` : type === "외박" ? ` ~ ${returnDate}` : "";
+    const msg = `[목천고 기숙사] ${studentName}(${room}호) ${type} 안내\n날짜: ${date}${timeInfo}\n사유: ${reason}\n\n담당 교사가 직접 처리한 건으로 별도 승인이 필요 없습니다.`;
+
+    await sendSMS(parentPhone, msg);
+    res.json({ success: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
 app.post("/onPointAdded", async (req, res) => {
   try {
     const { studentName, room, type, point, reason, parentPhone, penalties } = req.body;
