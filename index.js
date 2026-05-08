@@ -78,6 +78,20 @@ app.get("/approve", async (req, res) => {
   if (!id || !action) return res.send("잘못된 요청입니다.");
 
   try {
+    const snap = await db.collection("leaveRequests").doc(id).get();
+    if (!snap.exists()) return res.send("해당 신청을 찾을 수 없습니다.");
+
+    const data = snap.data();
+
+    // 교사가 이미 승인완료한 건은 학부모 재클릭 무시
+    if (data.teacherApproved === true || data.status === "승인완료") {
+      return res.send(`<html><body style="font-family:sans-serif;text-align:center;padding:60px">
+        <h2>✅ 이미 처리된 신청입니다</h2>
+        <p>${data.studentName} 학생의 ${data.type} 신청은 이미 교사 승인이 완료되었습니다.</p>
+        <p style="color:#888;font-size:14px">더 이상 변경할 수 없습니다.</p>
+      </body></html>`);
+    }
+
     const approved = action === "approve";
     await db.collection("leaveRequests").doc(id).update({
       parentApproved: approved,
@@ -85,8 +99,6 @@ app.get("/approve", async (req, res) => {
     });
 
     // 교사에게 문자 발송
-    const snap = await db.collection("leaveRequests").doc(id).get();
-    const data = snap.data();
     const teacherSnap = await db.collection("users").where("role", "==", "teacher").get();
     for (const t of teacherSnap.docs) {
       const teacher = t.data();
