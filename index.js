@@ -79,7 +79,7 @@ app.get("/approve", async (req, res) => {
 
   try {
     const snap = await db.collection("leaveRequests").doc(id).get();
-    if (!snap.exists()) return res.send("해당 신청을 찾을 수 없습니다.");
+    if (!snap.exists) return res.send("해당 신청을 찾을 수 없습니다.");
 
     const data = snap.data();
 
