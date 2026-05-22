@@ -158,7 +158,20 @@ app.post("/onPointAdded", async (req, res) => {
   }
 });
 
-// 헬스체크
+// ─── 퇴사 알림 ────────────────────────────────────────────────────────────
+app.post("/onEviction", async (req, res) => {
+  try {
+    const { studentName, room, type, startDate, endDate, parentPhone } = req.body;
+    if (!parentPhone) return res.json({ success: false, message: "학부모 번호 없음" });
+
+    const msg = `[목천고 기숙사] ${studentName}(${room}호) ${type} 퇴사 안내\n퇴사 기간: ${startDate} ~ ${endDate}\n\n자세한 사항은 담당 교사에게 문의하세요.`;
+    await sendSMS(parentPhone, msg);
+    res.json({ success: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
 app.get("/", (req, res) => res.send("목천고 SMS 서버 정상 작동 중 ✅"));
 
 // 서버 외부 IP 확인
